@@ -90,42 +90,60 @@ class Task:
                 else:
                     print(f"{serial}: [ ] {task[self.TITLE_KEY]}")
 
-    def update_task(self):
+    @staticmethod
+    def validate_input(func):
         """
-        This function updates the status of a task in a task list based on user input.
-        :return: If the user's choice is not "Y" (case insensitive),
-        the function will return without making any updates to the task.
+        The `validate_input` function is a Python decorator that checks
+        if a task is empty, prompts the user for input, and then calls
+        the decorated function with the input index if conditions are met.
+
+        :param func: The `func` parameter in the `validate_input` ecorator
+        is a function that will be passed as an argument to the `wrapper` function.
+        It represents he original method that the decorator is applied to.
+        In this case, `func` is a method that perates on a task list and is called
+        :return: The `wrapper` function is being returned.
         """
-        if self.is_task_empty():
-            print(self.EMPTY)
-        else:
+        def wrapper(self, *args, **kwargs):
+            if self.is_task_empty():
+                print(self.EMPTY)
+                return
             choice = input("Want to update the task Y or N: ")
             if choice.lower() != "y":
                 return
             index = self.get_number()
-            self._tasks[index][self.STATUS_KEY] = not self._tasks[index][
-                self.STATUS_KEY
-            ]
-
-    def delete_task(self):
-        """
-        This function allows the user to delete a task from a list of
-        tasks based on user input and task completion status.
-        :return: If the user's choice is not 'Y' (case-insensitive),
-        the function will return without performing any further actions.
-        """
-        if self.is_task_empty():
-            print(self.EMPTY)
-        else:
-            choice = input("Want to delete the task Y or N: ")
-            if choice.lower() != "y":
+            if index is None:
                 return
-            index = self.get_number()
-            if self._tasks[index][self.STATUS_KEY]:
-                print(f"{self._tasks[index]['title']} task is deleted.")
-                self._tasks.pop(index)
-            else:
-                print(f"{self._tasks[index]['title']} task is not completed.")
+            return func(self, index)
+        return wrapper
+
+    @validate_input
+    def update_task(self, index):
+        """
+        The `update_task` function toggles the status of a task at a
+        specific index in a list of tasks.
+
+        :param index: Index is the position of the task in the list that
+        you want to update. It is used to access the specific task that
+        you want to modify in the list of tasks
+        """
+        self._tasks[index][self.STATUS_KEY] = not self._tasks[index][self.STATUS_KEY]
+
+    @validate_input
+    def delete_task(self, index):
+        """
+        The `delete_task` function deletes a task from a list
+        if it is marked as completed.
+
+        :param index: The `index` parameter in the `delete_task`
+        function refers to the position of the task in the list of
+        tasks that you want to delete. It is used to identify the
+        specific task that you want to remove from the list
+        """
+        if self._tasks[index][self.STATUS_KEY]:
+            print(f"{self._tasks[index]['title']} task is deleted.")
+            self._tasks.pop(index)
+        else:
+            print(f"{self._tasks[index]['title']} task is not completed.")
 
     def save_task(self):
         """
