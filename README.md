@@ -13,3 +13,8 @@ A simple command-line task manager built using Python.
 
 ```bash
 python task_manager.py
+
+```
+
+## Demo
+![Task Manager CLI Demo](task-cli.gif)
